@@ -38,10 +38,10 @@
         const grouped = {};
 
         data.forEach(row => {
-          const key = `${row.name}-${row.lat}-${row.lng}`;
-          if (!grouped[key]) {
-            grouped[key] = {
-              name: row.name,
+          const groupKey = `${row.lat},${row.lng}`;
+          if (!grouped[groupKey]) {
+            grouped[groupKey] = {
+              name: row.name || '未命名大樓',
               lat: parseFloat(row.lat),
               lng: parseFloat(row.lng),
               age: parseInt(row.age),
@@ -50,7 +50,8 @@
               recent: []
             };
           }
-          grouped[key].recent.push({
+
+          grouped[groupKey].recent.push({
             year: parseInt(row.year),
             month: parseInt(row.month),
             unit_price: parseFloat(row.unit_price),
