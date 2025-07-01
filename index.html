@@ -33,13 +33,15 @@
     }).addTo(map);
 
     fetch('https://opensheet.elk.sh/1Eb7U6v_Z-P3unQmxsBkwkii9_aRW931934unYE1-11s/工作表1')
-
       .then(res => res.json())
       .then(data => {
         const grouped = {};
+
         data.forEach(row => {
-          if (!grouped[row.name]) {
-            grouped[row.name] = {
+          const key = `${row.name}-${row.lat}-${row.lng}`;
+          if (!grouped[key]) {
+            grouped[key] = {
+              name: row.name,
               lat: parseFloat(row.lat),
               lng: parseFloat(row.lng),
               age: parseInt(row.age),
@@ -48,7 +50,7 @@
               recent: []
             };
           }
-          grouped[row.name].recent.push({
+          grouped[key].recent.push({
             year: parseInt(row.year),
             month: parseInt(row.month),
             unit_price: parseFloat(row.unit_price),
