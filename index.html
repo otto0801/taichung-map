@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>台中房產互動地圖</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 90vh; }
+    table {
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 2px 4px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    th {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    var map = L.map('map').setView([24.1477, 120.6736], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap 貢獻者'
+    }).addTo(map);
+
+    fetch('buildings.json')
+      .then(res => res.json())
+      .then(buildings => {
+        buildings.forEach(b => {
+          let color = b.age < 5 ? "green" : (b.age <= 15 ? "orange" : "red");
+          let marker = L.circleMarker([b.lat, b.lng], {
+            radius: 10,
+            color: color,
+            fillOpacity: 0.8
+          }).addTo(map);
+
+          let tableRows = b.recent.map(r => {
+            let rocYear = r.year - 1911;
+            return `
+              <tr>
+                <td>${rocYear}/${String(r.month).padStart(2,'0')}</td>
+                <td>${r.unit_price} 萬</td>
+                <td>${r.total_price} 萬</td>
+                <td>${r.layout}</td>
+                <td>${r.car}</td>
+                <td>${parseFloat(r.area).toFixed(2)} 坪</td>
+                <td>${r.address}</td>
+              </tr>`;
+          }).join('');
+
+          let popupContent = `
+            <div style="font-size:13px; max-width: 300px; overflow-x: auto;">
+              <b>${b.name}</b><br>
+              屋齡: ${b.age} 年<br>
+              均價: ${b.price} 萬/坪<br>
+              大樓地址: ${b.address}<br><br>
+              <div style="overflow-x: auto;">
+                <table style="min-width: 500px;">
+                  <tr>
+                    <th>年月</th>
+                    <th>單價</th>
+                    <th>總價</th>
+                    <th>格局</th>
+                    <th>車位</th>
+                    <th>坪數</th>
+                    <th>詳細地址</th>
+                  </tr>
+                  ${tableRows}
+                </table>
+              </div>
+            </div>
+          `;
+
+          marker.bindPopup(popupContent);
+        });
+      })
+      .catch(err => console.error("載入資料失敗", err));
+  </script>
+</body>
+</html>

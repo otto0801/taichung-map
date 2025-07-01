@@ -1,0 +1,18 @@
+[
+  {
+    "name": "台中地標大樓",
+    "lat": 24.1550,
+    "lng": 120.6650,
+    "age": 5,
+    "price": 40,
+    "address": "台中市西區公益路100號",
+    "recent": [
+      { "year": 2025, "month": 6, "unit_price": 42, "total_price": 1680, "layout": "3房2廳2衛", "car": "有", "area": 40.12, "address": "台中市西區公益路100號15樓" },
+      { "year": 2025, "month": 5, "unit_price": 39, "total_price": 1365, "layout": "2房2廳1衛", "car": "無", "area": 35.75, "address": "台中市西區公益路100號10樓" },
+      { "year": 2025, "month": 4, "unit_price": 41, "total_price": 2050, "layout": "4房2廳2衛", "car": "有", "area": 50.25, "address": "台中市西區公益路100號12樓" },
+      { "year": 2025, "month": 3, "unit_price": 40, "total_price": 1600, "layout": "3房2廳2衛", "car": "有", "area": 40.00, "address": "台中市西區公益路100號8樓" },
+      { "year": 2025, "month": 2, "unit_price": 38, "total_price": 1520, "layout": "3房2廳2衛", "car": "無", "area": 40.05, "address": "台中市西區公益路100號6樓" },
+      { "year": 2025, "month": 1, "unit_price": 37, "total_price": 1110, "layout": "2房2廳1衛", "car": "有", "area": 30.88, "address": "台中市西區公益路100號5樓" }
+    ]
+  }
+]
