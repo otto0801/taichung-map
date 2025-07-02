@@ -33,7 +33,7 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([24.1477, 120.6736], 16);
+    var map = L.map('map').setView([24.150398, 120.661928], 16);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap 貢獻者',
@@ -69,12 +69,12 @@
     });
     map.addControl(new L.Control.ZoomOut());
 
-    // 動態資料 (範例：可替換成 fetch JSON 資料)
+    // 正確座標資料
     var buildings = [
       {
         name: "台中地標大樓",
-        lat: 24.1477,
-        lng: 120.6736,
+        lat: 24.150398,   // 公益路100號正確座標
+        lng: 120.661928,
         age: 5,
         price: 40,
         address: "台中市西區公益路100號",
