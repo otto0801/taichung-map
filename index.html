@@ -2,22 +2,29 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>台中房產互動地圖 - by Otto(阿正)</title>
+  <title>台中房產互動地圖 - by OTTO(阿正)</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     #map { height: 90vh; }
     table {
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 14px;
     }
     th, td {
       border: 1px solid #999;
-      padding: 2px 4px;
+      padding: 4px 6px;
       text-align: center;
       white-space: nowrap;
     }
     th {
       background-color: #eee;
+    }
+    .leaflet-control-custom-btn {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 2px 5px;
+      cursor: pointer;
+      margin: 2px;
     }
   </style>
 </head>
@@ -26,91 +33,99 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    var map = L.map('map').setView([24.1477, 120.6736], 13);
+    var map = L.map('map').setView([24.1477, 120.6736], 16);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap 貢獻者'
+      attribution: '© OpenStreetMap 貢獻者',
+      maxZoom: 20,
+      minZoom: 10
     }).addTo(map);
 
-    fetch('https://opensheet.elk.sh/1Eb7U6v_Z-P3unQmxsBkwkii9_aRW931934unYE1-11s/工作表1')
-      .then(res => res.json())
-      .then(data => {
-        const grouped = {};
+    // 放大按鈕
+    L.Control.ZoomIn = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function(map) {
+        var btn = L.DomUtil.create('div', 'leaflet-control-custom-btn');
+        btn.innerHTML = '放大';
+        btn.onclick = function() {
+          map.setZoom(map.getZoom() + 1);
+        }
+        return btn;
+      }
+    });
+    map.addControl(new L.Control.ZoomIn());
 
-        data.forEach(row => {
-          const groupKey = `${row.lat},${row.lng}`;
-          if (!grouped[groupKey]) {
-            grouped[groupKey] = {
-              name: row.name || '未命名大樓',
-              lat: parseFloat(row.lat),
-              lng: parseFloat(row.lng),
-              age: parseInt(row.age),
-              price: parseFloat(row.price),
-              address: row.address,
-              recent: []
-            };
-          }
+    // 縮小按鈕
+    L.Control.ZoomOut = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd: function(map) {
+        var btn = L.DomUtil.create('div', 'leaflet-control-custom-btn');
+        btn.innerHTML = '縮小';
+        btn.onclick = function() {
+          map.setZoom(map.getZoom() - 1);
+        }
+        return btn;
+      }
+    });
+    map.addControl(new L.Control.ZoomOut());
 
-          grouped[groupKey].recent.push({
-            year: parseInt(row.year),
-            month: parseInt(row.month),
-            unit_price: parseFloat(row.unit_price),
-            total_price: parseFloat(row.total_price),
-            layout: row.layout,
-            car: row.car,
-            area: parseFloat(row.area),
-            address: row.detail_address
-          });
-        });
+    // 動態資料 (範例：可替換成 fetch JSON 資料)
+    var buildings = [
+      {
+        name: "台中地標大樓",
+        lat: 24.1477,
+        lng: 120.6736,
+        age: 5,
+        price: 40,
+        address: "台中市西區公益路100號",
+        recent: [
+          { ym: "114/06", unit: 42, total: 1680, layout: "3房2廳2衛", car: "有", area: 40.12, addr: "台中市西區公益路100號15樓" },
+          { ym: "114/05", unit: 39, total: 1560, layout: "3房2廳2衛", car: "無", area: 35.75, addr: "台中市西區公益路100號10樓" }
+        ]
+      }
+    ];
 
-        Object.values(grouped).forEach(b => {
-          let color = b.age < 5 ? "green" : (b.age <= 15 ? "orange" : "red");
-          let marker = L.circleMarker([b.lat, b.lng], {
-            radius: 10,
-            color: color,
-            fillOpacity: 0.8
-          }).addTo(map);
+    buildings.forEach(function(b){
+      let tableRows = b.recent.map(r => `
+        <tr>
+          <td>${r.ym}</td>
+          <td>${r.unit} 萬</td>
+          <td>${r.total} 萬</td>
+          <td>${r.layout}</td>
+          <td>${r.car}</td>
+          <td>${r.area.toFixed(2)} 坪</td>
+          <td>${r.addr}</td>
+        </tr>`).join('');
 
-          let tableRows = b.recent.map(r => {
-            let rocYear = r.year - 1911;
-            return `
+      let popupContent = `
+        <div style="font-size: 16px; max-width: 500px; overflow-x: auto;">
+          <b>${b.name}</b><br>
+          屋齡: ${b.age} 年<br>
+          均價: ${b.price} 萬/坪<br>
+          大樓地址: ${b.address}<br><br>
+          <div style="overflow-x: auto;">
+            <table style="min-width: 700px;">
               <tr>
-                <td>${rocYear}/${String(r.month).padStart(2,'0')}</td>
-                <td>${r.unit_price} 萬</td>
-                <td>${r.total_price} 萬</td>
-                <td>${r.layout}</td>
-                <td>${r.car}</td>
-                <td>${r.area.toFixed(2)} 坪</td>
-                <td>${r.address}</td>
-              </tr>`;
-          }).join('');
+                <th>年月</th>
+                <th>單價</th>
+                <th>總價</th>
+                <th>格局</th>
+                <th>車位</th>
+                <th>坪數</th>
+                <th>詳細地址</th>
+              </tr>
+              ${tableRows}
+            </table>
+          </div>
+        </div>
+      `;
 
-          let popupContent = `
-            <div style="font-size:13px; max-width: 300px; overflow-x: auto;">
-              <b>${b.name}</b><br>
-              屋齡: ${b.age} 年<br>
-              均價: ${b.price} 萬/坪<br>
-              大樓地址: ${b.address}<br><br>
-              <div style="overflow-x: auto;">
-                <table style="min-width: 500px;">
-                  <tr>
-                    <th>年月</th>
-                    <th>單價</th>
-                    <th>總價</th>
-                    <th>格局</th>
-                    <th>車位</th>
-                    <th>坪數</th>
-                    <th>詳細地址</th>
-                  </tr>
-                  ${tableRows}
-                </table>
-              </div>
-            </div>
-          `;
-          marker.bindPopup(popupContent);
-        });
-      })
-      .catch(err => console.error("資料載入失敗", err));
+      L.circleMarker([b.lat, b.lng], {
+        radius: 10,
+        color: b.age < 5 ? "green" : (b.age <= 15 ? "orange" : "red"),
+        fillOpacity: 0.8
+      }).addTo(map).bindPopup(popupContent, { maxWidth: 600 });
+    });
   </script>
 </body>
 </html>
